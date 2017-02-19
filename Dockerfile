@@ -11,6 +11,7 @@ RUN pip install \
 
 RUN mkdir /machibot && git clone https://github.com/sasja/machibot_python /machibot
 
-RUN cd /machibot && git pull && git checkout 544ac21c1670cab96e27fc2aae7853be8e83da8c
+ARG commit
+RUN cd /machibot && git pull && git checkout $commit
 
 CMD cd /machibot && python pythonmachibot.py
