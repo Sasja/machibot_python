@@ -9,9 +9,10 @@ RUN pip install \
     requests \
     jsonschema
 
-RUN mkdir /machibot && git clone https://github.com/sasja/machibot_python /machibot
+ARG repo_url 
+RUN mkdir /machibot && git clone $repo_url /machibot
 
 ARG commit
 RUN cd /machibot && git pull && git checkout $commit
 
-CMD cd /machibot && python pythonmachibot.py
+CMD cd /machibot && python machibot.py
