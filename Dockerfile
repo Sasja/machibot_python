@@ -9,6 +9,8 @@ RUN pip install \
     requests \
     jsonschema
 
+COPY ./ .
+
 ARG commit
 RUN git pull && git checkout $commit
 
