@@ -11,7 +11,4 @@ RUN pip install \
 
 COPY ./ .
 
-#ARG commit
-#RUN git pull && git checkout $commit
-
 CMD python machibot.py
