@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-docker build -t machitest github.com/sasja/machibot_python
+commit=$(git log --format="%H" -n 1)
+docker build -t machitest github.com/sasja/machibot_python#$commit
