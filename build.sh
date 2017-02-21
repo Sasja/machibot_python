@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
 #FIXME this is temporary
-docker build -t machitest github.com/sasja/machibot_python --build-arg commit="f2ff295"
+#commit=$(git log --format="%H" -n 1)
+#docker build -t machitest github.com/sasja/machibot_python --build-arg commit=$commit
+docker build -t machitest github.com/sasja/machibot_python
