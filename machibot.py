@@ -2,25 +2,11 @@
 import os
 import json
 import random
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import socket
 
 def debug(message):
     print message
     pass
-
-class MachiBotHandler(BaseHTTPRequestHandler):
-    def _set_headers(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-    def do_POST(self):
-        self._set_headers()
-        length = int(self.headers.getheader('content-length'))
-        requestString = self.rfile.read(length)
-        actionRequest = json.loads(requestString)
-        choice = chooseAction(actionRequest)
-        self.wfile.write(choice)
 
 # RandomBot:
 # this is the absolute baseline AI
@@ -29,6 +15,30 @@ def chooseAction(actionRequest):
     choice = random.choice(actionRequest["options"])
     debug(choice)
     return choice
+
+def getRequestString(sock):
+    buff = ""
+    while True:
+        char = sock.recv(1)
+        if char == '':
+            raise RuntimeError("socket connection broken")
+        elif char == "\n":
+            break
+        else:
+            buff += char
+    debug("received '{}'".format(buff))
+    return buff
+
+def sendString(sock, msg):
+    debug("sending {}".format(msg))
+    assert("\n" not in msg)
+    msg += "\n"
+    totalsent = 0
+    while totalsent < len(msg):
+        sent = sock.send(msg[totalsent:])
+        if sent == 0:
+            raise RuntimeError("socket connection broken")
+        totalsent = totalsent + sent
 
 if __name__ == "__main__":
     DEFAULT_IP = "0.0.0.0" 
@@ -47,9 +57,26 @@ if __name__ == "__main__":
     else:
         print "no $MACHI_PORT found, using default PORT"
         port = DEFAULT_PORT
+
     address = (ip, port)
 
     print "binding server to {}".format(str(address))
-    httpd = HTTPServer(address, MachiBotHandler)
 
-    httpd.serve_forever()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(address)
+    sock.listen(1)
+
+    (clientSock, clientAddress) = sock.accept()
+
+    try:
+        while True:
+            requestStr = getRequestString(clientSock)
+            debug("###{}###".format(requestStr))
+            request = json.loads(requestStr)
+            reply = chooseAction(request)
+            sendString(clientSock, reply)
+    finally:
+        print "closing socket"
+        sock.shutdown(socket.SHUT_RDWR)
+        sock.close()
