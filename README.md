@@ -1,2 +1,1 @@
-# machibot_python
-template for a python machikoro bot
+repo migrated to https://gitlab.com/sasja/machibot_python
